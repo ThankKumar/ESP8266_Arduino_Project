@@ -1,0 +1,73 @@
+#include <ESP8266WiFi.h>
+#include <WiFiClient.h>
+#include <ESP8266WebServer.h>
+
+// SSID and Password for your WiFi network
+const char *ssid = "SwamiJi";
+const char *password = "6205662950";
+
+// Pins for home automation
+#define LedPin 16 // LED control GPIO16(D0)
+#define FanPin 14 // Fan control GPIO14(D5)
+
+// Web server on port 80
+ESP8266WebServer server(80);
+
+void setup()
+{
+  Serial.begin(115200);
+
+  // Set up home automation pins
+  pinMode(LedPin, OUTPUT);
+  pinMode(FanPin, OUTPUT);
+
+  // Connecting to WiFi
+  WiFi.begin(ssid, password);
+
+  Serial.print("Connecting to WiFi");
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println();
+
+  Serial.print("Connected to WiFi, IP address: ");
+  Serial.println(WiFi.localIP());
+
+  // Starting WEB-server
+  server.on("/", HTTP_handleRoot);
+  server.onNotFound(HTTP_handleRoot);
+  server.begin();
+}
+
+void loop()
+{
+  server.handleClient();
+
+  String command = server.arg("State");
+
+  // Home automation
+  if (command == "LED_ON")
+    digitalWrite(LedPin, HIGH); // turn on LED
+  else if (command == "LED_OFF")
+    digitalWrite(LedPin, LOW); // turn off LED
+  else if (command == "FAN_ONN")
+    digitalWrite(FanPin, HIGH); // turn on Fan
+  else if (command == "FAN_OFF")
+    digitalWrite(FanPin, LOW); // turn off Fan
+    else if (command == "ALL_OFF")
+    digitalWrite(FanPin, LOW); // turn off Fan
+    digitalWrite(LedPin, LOW); // TURN OFF LED
+}
+
+
+void HTTP_handleRoot(void)
+{
+  if (server.hasArg("State"))
+  {
+    Serial.println(server.arg("State"));
+  }
+  server.send(200, "text/html", "");
+  delay(1);
+}
