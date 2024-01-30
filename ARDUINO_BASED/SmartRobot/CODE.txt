@@ -154,7 +154,7 @@ void compareDistance(){
   delay(300);
   turnRight();
   delay(600);
-  fackword();
+  forword();
   }
 }
 
